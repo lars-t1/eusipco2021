@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <title>An Algorithm for Speech Inpainting on MFCCs Using Deep Neural Networks | Listening Examples</title>
+    <meta name="robots" content="noindex" />
+	<script type="text/x-mathjax-config">
+	  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+	</script>
+	<script type="text/javascript"
+	  src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+	</script>
+	<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.5/build/base-min.css">
+	<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.5/build/grids-min.css">
+	<link rel="stylesheet" href="https://unpkg.com/purecss@2.0.5/build/grids-responsive-min.css">
+	
+	<style>
+	.grid-container {
+	  display: grid;
+	  align-items: center;
+	  grid-template-columns: repeat(5, max-content);
+	  grid-gap: 10px;
+	  background-color: rgba(255, 255, 255, 0.0);
+	  padding: 15px;
+	  padding-left: 30px;
+	}
+
+	.grid-container > div {
+	  background-color: rgba(255, 255, 255, 0.0);
+	}
+
+	.speakertext {
+	  margin-top:50px;
+	  margin-bottom:0px;
+	}
+	
+	.columntext {
+	  text-align: center;
+	  font-size: 20px;
+	  font-weight: bold;
+	}
+	
+	.rowtext {
+	  text-align: left;
+	  font-size: 20px;
+	  font-weight: bold;
+	  padding-left: 40px;
+	  padding-right: 10px;
+	}
+	
+	.subrowtext {
+	  text-align: left;
+	  font-size: 20px;
+	  font-weight: bold;
+	  padding-left: 10px;
+	  padding-right: 10px;
+	}
+	
+	.multirowtext1 {
+	  text-align: left;
+	  font-size: 20px;
+	  font-weight: bold;
+	  padding-left: 40px;
+	  padding-right: 10px;
+	  grid-row-start: 10;
+	  grid-row-end: 12;
+	}
+	
+	.multirowtext2 {
+	  text-align: left;
+	  font-size: 20px;
+	  font-weight: bold;
+	  padding-left: 40px;
+	  padding-right: 10px;
+	  grid-row-start: 12;
+	  grid-row-end: 14;
+	}
+	
+	.corruptiontext {
+	  grid-column-start: 1;
+	  grid-column-end: 6;
+	  text-align: left;
+	  font-size: 24px;
+	  font-weight: bold;
+	  margin-top: 20px;
+	  padding-bottom: 3px;
+	}
+	
+	.celltext {
+	  text-align: center;
+	  font-size: 18px;
+	}
+
+	</style>
+
+  </head>
+
+  <body>
+
+    <h1>An Algorithm for Speech Inpainting on MFCCs Using Deep Neural Networks | Listening Examples</h1>
+
+    <p>All speakers are contained in the test set which means they have not been seen by the DNNs before. The clean audio files used to create the following audio examples were taken from the VCTK database [1].</p>
+	
+	<p>The following methods were used to create the audio examples:
+	<ul>
+	  <li>AudioUNet: Using the waveform-based AudioUNet trained on the lower-bandwidth data (see [2]).</li>
+	  <li>Lower-Bandwidth $\mathrm{DNN}_\mathrm{LB}$: Using our proposed MFCC-based DNN trained on the lower-bandwidth data (see [3]).</li>
+	  <li>Uniform $\mathrm{DNN}_\mathrm{U}$: Using our proposed MFCC-based DNN trained on the uniform data containing randomly distributed rectangular gaps (see [3]).</li>
+	</ul>
+	The filled gaps sequence was used for all audio examples. WN represents the case when white noise is used as excitation. CP denotes the cheated phase case. A detailed description of how the audio examples were generated can be found in [3].
+	</p>
+	
+	<br>
+    
+    <h2 class="speakertext">Example p226_003:</h2>
+	<div class="grid-container">
+	
+		<div class="rowtext">Uncorrupted (original)</div>
+		<div class="columntext"></div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_uncorrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="columntext"></div>
+		<div class="columntext"></div>
+		
+		
+		<div class="corruptiontext">Uniform Case (randomly distributed rectangular gaps):</div>
+		
+		
+		<div class="columntext"></div>
+		<div class="columntext"></div>
+		<div class="columntext">Corrupted</div>
+		<div class="columntext">Proposed $\mathrm{DNN}_\mathrm{U}$ [3] (WN)</div>
+		<div class="columntext">Proposed $\mathrm{DNN}_\mathrm{U}$ [3] (CP)</div>
+		
+		<div class="rowtext">$\hat{p}=30\%$</div>
+		<div class="celltext"></div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_predicted_filledGaps.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_predicted_filledGaps_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio></div>
+		<div class="celltext"></div>
+		
+		
+		<div class="corruptiontext">Lower-Bandwidth Case (Bandwidth Extension):</div>
+		
+		
+		<div class="columntext"></div>
+		<div class="columntext"></div>
+		<div class="columntext">$p=30\%\ (f_c=5.6\mathrm{kHz})$</div>
+		<div class="columntext">$p=50\%\ (f_c=4\mathrm{kHz})$</div>
+		<div class="columntext">$p=75\%\ (f_c=2\mathrm{kHz})$</div>
+		
+		<div class="rowtext">Corrupted</div>
+		<div class="celltext"></div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.3_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.5_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.75_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		
+		<div class="rowtext">AudioUNet [2]</div>
+		<div class="celltext"></div>
+		<div class="celltext">
+			n/a
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.5_audio_super_res.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.75_audio_super_res.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		
+		<div class="multirowtext1">Proposed $\mathrm{DNN}_\mathrm{U}$ [3]</div>
+		<div class="subrowtext">
+			WN
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.3_uniform.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.5_uniform.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.75_uniform.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="subrowtext">
+			CP
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.3_uniform_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.5_uniform_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.75_uniform_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		
+		<div class="multirowtext2">Proposed $\mathrm{DNN}_\mathrm{LB}$ [3]</div>
+		<div class="subrowtext">
+			WN
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.3_lowerbandwidth.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.5_lowerbandwidth.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.75_lowerbandwidth.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="subrowtext">
+			CP
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.3_lowerbandwidth_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.5_lowerbandwidth_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p226_003_perc=0.75_lowerbandwidth_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+	</div>
+	
+	
+    <h2 class="speakertext">Example p240_003:</h2>
+	<div class="grid-container">
+	
+		<div class="rowtext">Uncorrupted (original)</div>
+		<div class="columntext"></div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_uncorrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="columntext"></div>
+		<div class="columntext"></div>
+		
+		
+		<div class="corruptiontext">Uniform Case (randomly distributed rectangular gaps):</div>
+		
+		
+		<div class="columntext"></div>
+		<div class="columntext"></div>
+		<div class="columntext">Corrupted</div>
+		<div class="columntext">Proposed $\mathrm{DNN}_\mathrm{U}$ [3] (WN)</div>
+		<div class="columntext">Proposed $\mathrm{DNN}_\mathrm{U}$ [3] (CP)</div>
+		
+		<div class="rowtext">$\hat{p}=30\%$</div>
+		<div class="celltext"></div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_predicted_filledGaps.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_predicted_filledGaps_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio></div>
+		<div class="celltext"></div>
+		
+		
+		<div class="corruptiontext">Lower-Bandwidth Case (Bandwidth Extension):</div>
+		
+		
+		<div class="columntext"></div>
+		<div class="columntext"></div>
+		<div class="columntext">$p=30\%\ (f_c=5.6\mathrm{kHz})$</div>
+		<div class="columntext">$p=50\%\ (f_c=4\mathrm{kHz})$</div>
+		<div class="columntext">$p=75\%\ (f_c=2\mathrm{kHz})$</div>
+		
+		<div class="rowtext">Corrupted</div>
+		<div class="celltext"></div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.3_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.5_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.75_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		
+		<div class="rowtext">AudioUNet [2]</div>
+		<div class="celltext"></div>
+		<div class="celltext">
+			n/a
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.5_audio_super_res.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.75_audio_super_res.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		
+		<div class="multirowtext1">Proposed $\mathrm{DNN}_\mathrm{U}$ [3]</div>
+		<div class="subrowtext">
+			WN
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.3_uniform.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.5_uniform.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.75_uniform.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="subrowtext">
+			CP
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.3_uniform_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.5_uniform_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.75_uniform_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		
+		<div class="multirowtext2">Proposed $\mathrm{DNN}_\mathrm{LB}$ [3]</div>
+		<div class="subrowtext">
+			WN
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.3_lowerbandwidth.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.5_lowerbandwidth.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.75_lowerbandwidth.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="subrowtext">
+			CP
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.3_lowerbandwidth_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.5_lowerbandwidth_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p240_003_perc=0.75_lowerbandwidth_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+	</div>
+	
+	
+    <h2 class="speakertext">Example p275_088:</h2>
+	<div class="grid-container">
+	
+		<div class="rowtext">Uncorrupted (original)</div>
+		<div class="columntext"></div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_uncorrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="columntext"></div>
+		<div class="columntext"></div>
+		
+		
+		<div class="corruptiontext">Uniform Case (randomly distributed rectangular gaps):</div>
+		
+		
+		<div class="columntext"></div>
+		<div class="columntext"></div>
+		<div class="columntext">Corrupted</div>
+		<div class="columntext">Proposed $\mathrm{DNN}_\mathrm{U}$ [3] (WN)</div>
+		<div class="columntext">Proposed $\mathrm{DNN}_\mathrm{U}$ [3] (CP)</div>
+		
+		<div class="rowtext">$\hat{p}=30\%$</div>
+		<div class="celltext"></div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_predicted_filledGaps.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_predicted_filledGaps_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio></div>
+		<div class="celltext"></div>
+		
+		
+		<div class="corruptiontext">Lower-Bandwidth Case (Bandwidth Extension):</div>
+		
+		
+		<div class="columntext"></div>
+		<div class="columntext"></div>
+		<div class="columntext">$p=30\%\ (f_c=5.6\mathrm{kHz})$</div>
+		<div class="columntext">$p=50\%\ (f_c=4\mathrm{kHz})$</div>
+		<div class="columntext">$p=75\%\ (f_c=2\mathrm{kHz})$</div>
+		
+		<div class="rowtext">Corrupted</div>
+		<div class="celltext"></div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.3_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.5_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.75_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		
+		<div class="rowtext">AudioUNet [2]</div>
+		<div class="celltext"></div>
+		<div class="celltext">
+			n/a
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.5_audio_super_res.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.75_audio_super_res.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		
+		<div class="multirowtext1">Proposed $\mathrm{DNN}_\mathrm{U}$ [3]</div>
+		<div class="subrowtext">
+			WN
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.3_uniform.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.5_uniform.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.75_uniform.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="subrowtext">
+			CP
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.3_uniform_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.5_uniform_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.75_uniform_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		
+		<div class="multirowtext2">Proposed $\mathrm{DNN}_\mathrm{LB}$ [3]</div>
+		<div class="subrowtext">
+			WN
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.3_lowerbandwidth.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.5_lowerbandwidth.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.75_lowerbandwidth.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="subrowtext">
+			CP
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.3_lowerbandwidth_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.5_lowerbandwidth_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p275_088_perc=0.75_lowerbandwidth_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+	</div>
+	
+	
+	
+    <h2 class="speakertext">Example p317_013:</h2>
+	<div class="grid-container">
+	
+		<div class="rowtext">Uncorrupted (original)</div>
+		<div class="columntext"></div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_uncorrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="columntext"></div>
+		<div class="columntext"></div>
+		
+		
+		<div class="corruptiontext">Uniform Case (randomly distributed rectangular gaps):</div>
+		
+		
+		<div class="columntext"></div>
+		<div class="columntext"></div>
+		<div class="columntext">Corrupted</div>
+		<div class="columntext">Proposed $\mathrm{DNN}_\mathrm{U}$ [3] (WN)</div>
+		<div class="columntext">Proposed $\mathrm{DNN}_\mathrm{U}$ [3] (CP)</div>
+		
+		<div class="rowtext">$\hat{p}=30\%$</div>
+		<div class="celltext"></div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_predicted_filledGaps.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_predicted_filledGaps_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio></div>
+		<div class="celltext"></div>
+		
+		
+		<div class="corruptiontext">Lower-Bandwidth Case (Bandwidth Extension):</div>
+		
+		
+		<div class="columntext"></div>
+		<div class="columntext"></div>
+		<div class="columntext">$p=30\%\ (f_c=5.6\mathrm{kHz})$</div>
+		<div class="columntext">$p=50\%\ (f_c=4\mathrm{kHz})$</div>
+		<div class="columntext">$p=75\%\ (f_c=2\mathrm{kHz})$</div>
+		
+		<div class="rowtext">Corrupted</div>
+		<div class="celltext"></div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.3_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.5_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.75_corrupted.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		
+		<div class="rowtext">AudioUNet [2]</div>
+		<div class="celltext"></div>
+		<div class="celltext">
+			n/a
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.5_audio_super_res.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.75_audio_super_res.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		
+		<div class="multirowtext1">Proposed $\mathrm{DNN}_\mathrm{U}$ [3]</div>
+		<div class="subrowtext">
+			WN
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.3_uniform.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.5_uniform.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.75_uniform.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="subrowtext">
+			CP
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.3_uniform_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.5_uniform_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.75_uniform_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		
+		<div class="multirowtext2">Proposed $\mathrm{DNN}_\mathrm{LB}$ [3]</div>
+		<div class="subrowtext">
+			WN
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.3_lowerbandwidth.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.5_lowerbandwidth.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.75_lowerbandwidth.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="subrowtext">
+			CP
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.3_lowerbandwidth_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.5_lowerbandwidth_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+		<div class="celltext">
+			<audio controls>
+				<source src="p317_013_perc=0.75_lowerbandwidth_cheatedPhase.wav" type="audio/wav">
+				Your browser does not support the audio element.
+			</audio>
+		</div>
+	</div>
+	
+	<br>
+	
+	<h2>References</h2>
+	[1] Christophe Veaux, Junichi Yamagishi, and Kirsten MacDonald, “CSTR VCTK corpus: English multi-speaker corpus for CSTR voice cloning toolkit,” 2017.<br>
+	[2] V. Kuleshov, S. Z. Enam, and S. Ermon, “Audio super resolution using neural networks,” in International Conference on Learning Representations (ICLR), 2017.<br>
+	[3] Lars Thieling, and Peter Jax, “Speech Inpainting Using Deep Neural Networks Applied to Mel Frequency Cepstral Coefficients,” (Submitted to EUSIPCO2021).<br>
+	</body>
+</html>
